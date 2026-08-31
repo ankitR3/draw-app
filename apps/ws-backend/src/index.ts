@@ -1,9 +1,36 @@
-import { WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import jwt from 'jsonwebtoken';
-// import 'dotenv/config';
 import { JWT_SECRET } from '@repo/backend-common/config';
+import prisma from '@repo/db';
 
 const wss = new WebSocketServer({ port: 8080 });
+
+interface User {
+    ws: WebSocket,
+    rooms: String[],
+    userId: string
+}
+
+const users: User[] = [];
+
+function checkUser(token: string): string | null {
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+    
+        if (typeof decoded == 'string') {
+            return null;
+        }
+
+        if (!decoded || !decoded.userId) {
+            return null;
+        }
+        return decoded.userId;
+    } catch(err) {
+        console.log('error while checking user');
+        return null;
+    }
+    return null;
+}
 
 wss.on('connection', function connection(ws, request) {
     const url = request.url;
@@ -11,26 +38,58 @@ wss.on('connection', function connection(ws, request) {
         return;
     }
 
-    // const JWT_SECRET = process.env.JWT_SECRET;
-    // if (!JWT_SECRET) {
-    //     throw new Error('JWT_SECRET is not defined');
-    // }
-
     const queryParams = new URLSearchParams(url.split('?')[1]);
     const token = queryParams.get('token') || '';
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const userId = checkUser(token);
 
-    if (typeof decoded == 'string') {
-        ws.close();
+    if (userId == null) {
+        ws.close()
         return;
     }
 
-    if (!decoded || !decoded.userId) {
-        ws.close();
-        return;
-    }
+    users.push({
+        userId,
+        rooms: [],
+        ws
+    })
 
-    ws.on('message', function message(data) {
-        ws.send('pong');
+    ws.on('message', async function message(data) {
+        const parsedData = JSON.parse(data as unknown as string);
+
+        if (parsedData.type === 'join_room') {
+            const user = users.find(x => x.ws === ws);
+            user?.rooms.push(parsedData.roomId);
+        }
+
+        if (parsedData.type === 'leave room') {
+            const user = users.find(x => x.ws === ws);
+            if (!user) {
+                return;
+            }
+            user.rooms = user?.rooms.filter(x => x === parsedData.room)
+        }
+
+        if (parsedData.type === 'chat') {
+            const roomId = parsedData.roomId;
+            const message = parsedData.message;
+
+            await prisma.chat.create({
+                data: {
+                    roomId,
+                    message,
+                    userId
+                }
+            })
+
+            users.forEach(user => {
+                if (user.rooms.includes(roomId)) {
+                    user.ws.send(JSON.stringify({
+                        type: 'chat',
+                        message: message,
+                        roomId
+                    }))
+                }
+            })
+        }
     });
 });
