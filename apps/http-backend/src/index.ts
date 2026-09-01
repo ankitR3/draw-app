@@ -6,7 +6,7 @@ import chatRouter from './routes/chat.route';
 
 const app = express();
 app.use(express.json());
-const PORT = 3000;
+const PORT = 3001;
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/room', roomRouter);
