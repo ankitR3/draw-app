@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '@repo/db';
-import { CreateUserSchema } from '@repo/common/types';
+import { CreateUserSchema } from '@repo/common';
 
 export default async function signupController(req: Request, res: Response) {
     const data = CreateUserSchema.safeParse(req.body);

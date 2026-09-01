@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateRoomSchema } from '@repo/common/types';
+import { CreateRoomSchema } from '@repo/common';
 import prisma from '@repo/db';
 
 export default async function createRoomController(req: Request, res: Response) {

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '@repo/db';
 import jwt from 'jsonwebtoken';
-import { SignInSchema } from '@repo/common/types';
+import { SignInSchema } from '@repo/common';
 import { JWT_SECRET } from '@repo/backend-common/config';
 
 export default async function signinController(req: Request, res: Response) {
