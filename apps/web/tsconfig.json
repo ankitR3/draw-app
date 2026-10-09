@@ -14,6 +14,6 @@
     "next-env.d.ts",
     "next.config.js",
     ".next/types/**/*.ts"
-  ],
+, "../excelidraw-frontend/src/components/CTA.tsx", "../excelidraw-frontend/src/components/FAQ.tsx", "../excelidraw-frontend/src/components/Features.tsx", "../excelidraw-frontend/src/components/Footer.tsx", "../excelidraw-frontend/src/components/Hero.tsx", "../excelidraw-frontend/src/components/HowItWorks.tsx", "../excelidraw-frontend/src/components/Navbar.tsx", "../excelidraw-frontend/src/components/Pricing.tsx", "../excelidraw-frontend/src/components/Showcase.tsx", "../excelidraw-frontend/src/components/StatsBar.tsx"  ],
   "exclude": ["node_modules"]
 }
